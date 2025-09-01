@@ -4,6 +4,9 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
+// Import database connection
+const { sequelize, testConnection } = require('./config/connection');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -17,6 +20,9 @@ app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/quizzes', require('./routes/quizzes'));
+app.use('/api/categories', require('./routes/categories'));
+app.use('/api/tags', require('./routes/tags'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -36,7 +42,9 @@ app.get('/', (req, res) => {
       health: '/health',
       auth: '/api/auth',
       quizzes: '/api/quizzes',
-      users: '/api/users'
+      users: '/api/users',
+      categories: '/api/categories',
+      tags: '/api/tags'
     }
   });
 });
@@ -59,10 +67,25 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/health`);
-  console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
-});
+const startServer = async () => {
+  try {
+    // Test database connection
+    await testConnection();
+    
+    console.log('✅ Database connection established');
+    
+    // Start the server
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+      console.log(`📍 Health check: http://localhost:${PORT}/health`);
+      console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
 
 module.exports = app;

@@ -108,3 +108,6 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 *.db
+
+# Sequelize config with credentials
+config/config.json

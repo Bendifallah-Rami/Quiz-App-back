@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "your_username",
+    "password": "your_password",
+    "database": "quiz_app_dev",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "your_username",
+    "password": "your_password",
+    "database": "quiz_app_test",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "your_username",
+    "password": "your_password",
+    "database": "quiz_app_production",
+    "host": "127.0.0.1",
+    "port": 5432,
+    "dialect": "postgres"
+  }
+}
