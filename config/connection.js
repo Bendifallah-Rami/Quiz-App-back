@@ -13,7 +13,7 @@ const sequelize = new Sequelize(
     host: dbConfig.host,
     port: dbConfig.port,
     dialect: dbConfig.dialect,
-    logging: dbConfig.logging,
+    logging: false, // Disable all Sequelize logging
     pool: dbConfig.pool,
     dialectOptions: dbConfig.dialectOptions || {}
   }
