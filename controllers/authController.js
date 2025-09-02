@@ -271,11 +271,48 @@ const logoutUser = async (req, res) => {
   }
 };
 
+// Google OAuth Callback Handler
+const googleCallback = async (req, res) => {
+  try {
+    console.log('Google OAuth callback received');
+    
+    // The user is authenticated by passport and available in req.user
+    if (!req.user) {
+      console.error('No user data received from Google OAuth');
+      return res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=no_user_data`);
+    }
+    
+    const user = req.user;
+    console.log('User authenticated:', user.email);
+
+    // Update last login time
+    try {
+      await user.updateLastLogin();
+    } catch (loginUpdateError) {
+      console.error('Failed to update last login time:', loginUpdateError);
+    }
+
+    // Generate JWT token
+    const token = generateToken(user.id);
+    
+    // Build the redirect URL
+    const redirectUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}`;
+    console.log('Redirecting to:', redirectUrl);
+
+    // Redirect to frontend with token
+    res.redirect(redirectUrl);
+  } catch (error) {
+    console.error('Google callback error:', error);
+    res.redirect(`${process.env.FRONTEND_URL || 'http://localhost:3000'}/login?error=google_auth_failed&message=${encodeURIComponent(error.message)}`);
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   confirmEmail,
   resendConfirmationEmail,
   getUserProfile,
-  logoutUser
+  logoutUser,
+  googleCallback
 };

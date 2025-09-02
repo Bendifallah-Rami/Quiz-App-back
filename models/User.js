@@ -27,10 +27,24 @@ const User = sequelize.define('User', {
   },
   passwordHash: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true, // Changed to allow null for Google auth users
     validate: {
       notEmpty: true
     }
+  },
+  googleId: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    unique: true
+  },
+  googleProfilePicture: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  authProvider: {
+    type: DataTypes.ENUM('local', 'google'),
+    defaultValue: 'local',
+    allowNull: false
   },
   role: {
     type: DataTypes.ENUM('student', 'teacher', 'admin'),
@@ -59,12 +73,12 @@ const User = sequelize.define('User', {
   timestamps: true,
   hooks: {
     beforeCreate: async (user) => {
-      if (user.passwordHash) {
+      if (user.passwordHash && user.authProvider === 'local') {
         user.passwordHash = await bcrypt.hash(user.passwordHash, 12);
       }
     },
     beforeUpdate: async (user) => {
-      if (user.changed('passwordHash')) {
+      if (user.changed('passwordHash') && user.authProvider === 'local') {
         user.passwordHash = await bcrypt.hash(user.passwordHash, 12);
       }
     }
@@ -73,6 +87,9 @@ const User = sequelize.define('User', {
 
 // Instance methods
 User.prototype.comparePassword = async function(password) {
+  if (this.authProvider !== 'local') {
+    return false; // Cannot compare password for non-local auth users
+  }
   return await bcrypt.compare(password, this.passwordHash);
 };
 

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const passport = require('./config/passport');
 require('dotenv').config();
 
 // Import database connection
@@ -17,14 +18,17 @@ app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
+// Initialize Passport
+app.use(passport.initialize());
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
-app.use('/api/quizzes', require('./routes/quizzes'));
+app.use('/api/quizzes', require('./routes/quizzes')); 
 app.use('/api/categories', require('./routes/categories'));
 app.use('/api/tags', require('./routes/tags'));
 
-// Health check endpoint
+// Health check endpoint 
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
