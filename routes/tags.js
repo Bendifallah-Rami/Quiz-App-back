@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('Error fetching tags:', error);
     res.status(500).json({
-      error: 'Failed to get tags',
+      error: 'Failed to get tags', 
       message: error.message
     });
   }
