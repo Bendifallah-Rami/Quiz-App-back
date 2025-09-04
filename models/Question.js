@@ -25,9 +25,18 @@ const Question = sequelize.define('Question', {
     }
   },
   type: {
-    type: DataTypes.ENUM('single-choice', 'multiple-choice'),
+    type: DataTypes.ENUM('single-choice', 'multiple-choice', 'short-answer', 'true-false'),
     allowNull: false,
     defaultValue: 'single-choice'
+  },
+  points: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1
+  },
+  explanation: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 }, {
   tableName: 'questions',

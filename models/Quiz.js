@@ -34,6 +34,21 @@ const Quiz = sequelize.define('Quiz', {
       model: 'users',
       key: 'id'
     }
+  },
+  difficulty: {
+    type: DataTypes.ENUM('easy', 'medium', 'hard'),
+    allowNull: false,
+    defaultValue: 'medium'
+  },
+  passingScore: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 50
+  },
+  status: {
+    type: DataTypes.ENUM('draft', 'published'),
+    allowNull: false,
+    defaultValue: 'draft'
   }
 }, {
   tableName: 'quizzes',
