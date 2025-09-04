@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const passport = require('./config/passport');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 // Import database connection
@@ -17,6 +18,7 @@ app.use(cors()); // Enable CORS
 // app.use(morgan('combined')); // Disable HTTP request logging
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+app.use(cookieParser()); // Parse cookies
 
 // Initialize Passport
 app.use(passport.initialize());

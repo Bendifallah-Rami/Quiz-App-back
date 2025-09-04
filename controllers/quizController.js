@@ -3,14 +3,16 @@ const { Quiz, Question } = require('../models');
 // Step 1: Create quiz
 const createQuiz = async (req, res) => {
   try {
-    const { title, description, difficulty, passingScore } = req.body;
+    const { title, description, difficulty, passingScore ,categoryId} = req.body;
+    // console.log(`This is the user id: ${req.user.id}`);
     const quiz = await Quiz.create({
       title,
       description,
       difficulty,
       passingScore,
+      categoryId,
       status: 'draft',
-      creatorId: req.user.id // assuming req.user is set by auth middleware
+      createdBy: 11 // assuming req.user is set by auth middleware
     });
     res.status(201).json(quiz);
   } catch (err) {

@@ -8,7 +8,8 @@ const {
   resendConfirmationEmail, 
   getUserProfile, 
   logoutUser,
-  googleCallback
+  googleCallback,
+  registerAdmin
 } = require('../controllers/authController');
 const { authenticateToken } = require('../middleware/auth');
 
@@ -45,5 +46,8 @@ router.get('/google/callback',
   }),
   googleCallback
 ); 
+
+// POST /api/auth/register-admin
+router.post('/register-admin', registerAdmin);
 
 module.exports = router;
