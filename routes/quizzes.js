@@ -1,31 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const {
-  getAllQuizzes,
-  getQuizById,
-  createQuiz,
-  updateQuiz,
-  deleteQuiz,
-  submitQuiz
+const { 
+  createQuiz, 
+  getQuizConfirmation, 
+  updateQuizStatus, 
+  deleteQuiz 
 } = require('../controllers/quizController');
+const { addQuestionToQuiz } = require('../controllers/questionController');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
-// GET /api/quizzes - Get all quizzes
-router.get('/', getAllQuizzes);
-
-// GET /api/quizzes/:id - Get specific quiz
-router.get('/:id', getQuizById);
-
-// POST /api/quizzes - Create new quiz (admin only)
+// Step 1: Create quiz
 router.post('/', authenticateToken, requireAdmin, createQuiz);
 
-// PUT /api/quizzes/:id - Update quiz (admin only)
-router.put('/:id', authenticateToken, requireAdmin, updateQuiz);
+// Step 2: Add question to quiz
+router.post('/:quizId/questions', authenticateToken, requireAdmin, addQuestionToQuiz);
 
-// DELETE /api/quizzes/:id - Delete quiz (admin only)
-router.delete('/:id', authenticateToken, requireAdmin, deleteQuiz);
-
-// POST /api/quizzes/:id/submit - Submit quiz answers
-router.post('/:id/submit', authenticateToken, submitQuiz);
+// Step 3: Confirmation & Final Actions
+router.get('/:quizId/confirmation', authenticateToken, requireAdmin, getQuizConfirmation);
+router.patch('/:quizId/status', authenticateToken, requireAdmin, updateQuizStatus);
+router.delete('/:quizId', authenticateToken, requireAdmin, deleteQuiz);
 
 module.exports = router;
