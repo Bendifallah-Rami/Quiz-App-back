@@ -2,6 +2,11 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/connection');
 
 const QuizTag = sequelize.define('QuizTag', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true
+  },
   quizId: {
     type: DataTypes.INTEGER,
     allowNull: false,
