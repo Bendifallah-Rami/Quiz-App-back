@@ -8,13 +8,14 @@ exports.addQuestionToQuiz = async (req, res) => {
     if (quiz.status !== 'draft') {
       return res.status(400).json({ error: 'Can only add questions to draft quizzes' });
     }
+    console.log("this is the quiz", req.body)
     const { text, type, options, answer, points, explanation } = req.body;
     const question = await Question.create({
       quizId: quiz.id,
       text,
       type,
       options,
-      answer,
+      answer, 
       points,
       explanation
     });

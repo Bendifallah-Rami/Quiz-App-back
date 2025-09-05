@@ -1,9 +1,9 @@
-const { Quiz, Question } = require('../models');
+const { Quiz, Question, User, Category, Tag } = require('../models');
 
 // Step 1: Create quiz
 const createQuiz = async (req, res) => {
   try {
-    const { title, description, difficulty, passingScore ,categoryId} = req.body;
+    const {id , title, description, difficulty, passingScore ,categoryId} = req.body;
     // console.log(`This is the user id: ${req.user.id}`);
     const quiz = await Quiz.create({
       title,
@@ -12,7 +12,7 @@ const createQuiz = async (req, res) => {
       passingScore,
       categoryId,
       status: 'draft',
-      createdBy: 11 // assuming req.user is set by auth middleware
+      createdBy: id // assuming req.user is set by auth middleware
     });
     res.status(201).json(quiz);
   } catch (err) {
@@ -24,10 +24,35 @@ const createQuiz = async (req, res) => {
 const getQuizConfirmation = async (req, res) => {
   try {
     const quiz = await Quiz.findByPk(req.params.quizId, {
-      include: [Question]
+      include: [
+        { model: Question, as: 'questions' },
+        { model: User, as: 'creator', attributes: ['name', 'email'] },
+        { model: Category, as: 'category', attributes: ['name'] },
+        { model: Tag, as: 'tags', attributes: ['name'], through: { attributes: [] } }
+      ]
     });
     if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
-    res.json(quiz);
+    // Remove id fields from main quiz object
+    const quizObj = quiz.toJSON();
+    delete quizObj.id;
+    delete quizObj.categoryId;
+    delete quizObj.createdBy;
+    // Remove id fields from nested objects
+    if (quizObj.creator) delete quizObj.creator.id;
+    if (quizObj.category) delete quizObj.category.id;
+    if (Array.isArray(quizObj.questions)) {
+      quizObj.questions = quizObj.questions.map(q => {
+        const { id, quizId, ...rest } = q;
+        return rest;
+      });
+    }
+    if (Array.isArray(quizObj.tags)) {
+      quizObj.tags = quizObj.tags.map(t => {
+        const { id, ...rest } = t;
+        return rest;
+      });
+    }
+    res.json(quizObj);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -66,9 +91,59 @@ const deleteQuiz = async (req, res) => {
   }
 };
 
+// Get all quizzes with details
+const getAllQuizzes = async (req, res) => {
+  try {
+    const quizzes = await Quiz.findAll({
+      include: [
+        { model: Question, as: 'questions' },
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] },
+        { model: Category, as: 'category', attributes: ['id', 'name'] },
+        { model: Tag, as: 'tags', attributes: ['id', 'name'], through: { attributes: [] } }
+      ]
+    });
+    res.json(quizzes);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get quiz by id with details
+const getQuizById = async (req, res) => {
+  try {
+    const quiz = await Quiz.findByPk(req.params.quizId, {
+      include: [
+        { model: Question, as: 'questions' },
+        { model: User, as: 'creator', attributes: ['id', 'name', 'email'] },
+        { model: Category, as: 'category', attributes: ['id', 'name'] },
+        { model: Tag, as: 'tags', attributes: ['id', 'name'], through: { attributes: [] } }
+      ]
+    });
+    if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
+    res.json(quiz);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Update quiz by id
+const updateQuiz = async (req, res) => {
+  try {
+    const quiz = await Quiz.findByPk(req.params.quizId);
+    if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
+    await quiz.update(req.body);
+    res.json(quiz);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   createQuiz,
   getQuizConfirmation,
   updateQuizStatus,
-  deleteQuiz
+  deleteQuiz,
+  getAllQuizzes,
+  getQuizById,
+  updateQuiz
 };
