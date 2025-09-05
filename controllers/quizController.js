@@ -1,10 +1,10 @@
-const { Quiz, Question, User, Category, Tag } = require('../models');
+const { Quiz, Question, User, Category, Tag, QuizTag } = require('../models');
 
 // Step 1: Create quiz
 const createQuiz = async (req, res) => {
   try {
-    const {id , title, description, difficulty, passingScore ,categoryId} = req.body;
-    // console.log(`This is the user id: ${req.user.id}`);
+    const { createdBy, title, description, difficulty, passingScore, categoryId, tags } = req.body;
+    // Create the quiz
     const quiz = await Quiz.create({
       title,
       description,
@@ -12,8 +12,14 @@ const createQuiz = async (req, res) => {
       passingScore,
       categoryId,
       status: 'draft',
-      createdBy: id // assuming req.user is set by auth middleware
+      createdBy: createdBy // assuming req.user is set by auth middleware
     });
+    // Associate tags if provided
+    if (Array.isArray(tags) && tags.length > 0) {
+      for (const tagId of tags) {
+        await QuizTag.create({ quizId: quiz.id, tagId });
+      }
+    }
     res.status(201).json(quiz);
   } catch (err) {
     res.status(500).json({ error: err.message });
