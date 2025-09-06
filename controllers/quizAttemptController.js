@@ -32,6 +32,45 @@ exports.createQuizAttempt = async (req, res) => {
     }
     attempt.score = totalScore;
     await attempt.save();
+    // Update UserStats streak logic
+    const userStats = await require('../models').UserStats.findOne({ where: { userId } });
+    const quiz = await Quiz.findByPk(quizId);
+    const passed = totalScore >= quiz.passingScore;
+    const today = new Date();
+    let update = {};
+    if (userStats) {
+      // Calculate streak
+      const lastDate = userStats.lastActivityDate ? new Date(userStats.lastActivityDate) : null;
+      const isConsecutive = lastDate &&
+        lastDate.getFullYear() === today.getFullYear() &&
+        lastDate.getMonth() === today.getMonth() &&
+        (today.getDate() - lastDate.getDate() === 1);
+      if (passed) {
+        update.quizzesPassed = userStats.quizzesPassed + 1;
+        if (isConsecutive) {
+          update.currentStreak = userStats.currentStreak + 1;
+        } else {
+          update.currentStreak = 1;
+        }
+        update.longestStreak = Math.max(userStats.longestStreak, update.currentStreak);
+      } else {
+        update.currentStreak = 0;
+      }
+      update.quizzesTaken = userStats.quizzesTaken + 1;
+      update.totalScore = userStats.totalScore + totalScore;
+      update.lastActivityDate = today;
+      await userStats.update(update);
+    } else {
+      await require('../models').UserStats.create({
+        userId,
+        quizzesTaken: 1,
+        quizzesPassed: passed ? 1 : 0,
+        totalScore,
+        currentStreak: passed ? 1 : 0,
+        longestStreak: passed ? 1 : 0,
+        lastActivityDate: today
+      });
+    }
     res.status(201).json({ attemptId: attempt.id, score: totalScore });
   } catch (err) {
     res.status(500).json({ error: err.message });

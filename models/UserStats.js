@@ -32,7 +32,7 @@ const UserStats = sequelize.define('UserStats', {
       min: 0
     }
   },
-  streak: {
+  quizzesPassed: {
     type: DataTypes.INTEGER,
     allowNull: false,
     defaultValue: 0,
@@ -40,36 +40,58 @@ const UserStats = sequelize.define('UserStats', {
       min: 0
     }
   },
-  lastActiveDate: {
-    type: DataTypes.DATEONLY,
+  currentStreak: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    validate: {
+      min: 0
+    }
+  },
+  longestStreak: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0,
+    validate: {
+      min: 0
+    }
+  },
+  lastActivityDate: {
+    type: DataTypes.DATE,
     allowNull: true
   }
 }, {
   tableName: 'user_stats',
-  timestamps: true
+  timestamps: false
 });
 
 // Instance methods
-UserStats.prototype.updateStats = async function(quizScore) {
+UserStats.prototype.updateStats = async function(quizScore, passed) {
   this.totalScore += quizScore;
   this.quizzesTaken += 1;
+  if (passed) this.quizzesPassed += 1;
   
   // Update streak logic
   const today = new Date().toISOString().split('T')[0];
-  const lastActive = this.lastActiveDate ? this.lastActiveDate.toISOString().split('T')[0] : null;
+  const lastActive = this.lastActivityDate ? this.lastActivityDate.toISOString().split('T')[0] : null;
   
   if (lastActive) {
     const daysDiff = Math.floor((new Date(today) - new Date(lastActive)) / (1000 * 60 * 60 * 24));
     if (daysDiff === 1) {
-      this.streak += 1;
+      this.currentStreak += 1;
     } else if (daysDiff > 1) {
-      this.streak = 1;
+      this.currentStreak = 1;
     }
   } else {
-    this.streak = 1;
+    this.currentStreak = 1;
   }
   
-  this.lastActiveDate = today;
+  // Update longest streak if current streak is greater
+  if (this.currentStreak > this.longestStreak) {
+    this.longestStreak = this.currentStreak;
+  }
+  
+  this.lastActivityDate = today;
   await this.save();
 };
 
