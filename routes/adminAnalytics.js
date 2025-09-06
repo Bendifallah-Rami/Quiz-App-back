@@ -18,4 +18,4 @@ router.get('/quiz-pass-rates', requireAdmin, adminAnalyticsController.getQuizPas
 // Get daily activity
 router.get('/daily-activity', requireAdmin, adminAnalyticsController.getDailyActivity);
 
-module.exports = router; 
+module.exports = router;
