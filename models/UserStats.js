@@ -99,4 +99,7 @@ UserStats.prototype.getAverageScore = function() {
   return this.quizzesTaken > 0 ? Math.round(this.totalScore / this.quizzesTaken) : 0;
 };
 
+// Associations for analytics
+const User = require('./User');
+UserStats.belongsTo(User, { foreignKey: 'userId' });
 module.exports = UserStats;

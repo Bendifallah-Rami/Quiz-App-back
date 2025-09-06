@@ -33,6 +33,7 @@ app.use('/api/quizeTag', require('./routes/quizeTag'));
 app.use('/api/options', require('./routes/options'));
 app.use('/api/quizAttempts', require('./routes/quizAttempts'));
 app.use('/api/userStats', require('./routes/userStats'));
+app.use('/api/admin-analytics', require('./routes/adminAnalytics'));
 
 // Health check endpoint 
 app.get('/health', (req, res) => {
