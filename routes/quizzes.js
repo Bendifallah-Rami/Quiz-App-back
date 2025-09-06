@@ -1,35 +1,39 @@
 const express = require('express');
 const router = express.Router();
+const { authenticateToken, requireTeacher, requireAdmin } = require('../middleware/auth');
 const { 
   createQuiz, 
   getQuizConfirmation, 
   updateQuizStatus, 
-  deleteQuiz,
-  getAllQuizzes,
-  getQuizById,
-  updateQuiz
+  deleteQuiz, 
+  getAllQuizzes, 
+  getQuizById, 
+  updateQuiz 
 } = require('../controllers/quizController');
 const { addQuestionToQuiz } = require('../controllers/questionController');
-const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
-// Step 1: Create quiz
-router.post('/', authenticateToken, requireAdmin, createQuiz);
+// Teacher & Admin: Create quiz
+router.post('/', authenticateToken, requireTeacher, createQuiz);
 
-// Step 2: Add question to quiz
-router.post('/:quizId/questions', authenticateToken, requireAdmin, addQuestionToQuiz);
+// Teacher & Admin: Add question to quiz
+router.post('/:quizId/questions', authenticateToken, requireTeacher, addQuestionToQuiz);
 
-// Step 3: Confirmation & Final Actions
-router.get('/:quizId/confirmation', authenticateToken, requireAdmin, getQuizConfirmation);
-router.patch('/:quizId/status', authenticateToken, requireAdmin, updateQuizStatus);
-router.delete('/:quizId', authenticateToken, requireAdmin, deleteQuiz);
+// Teacher & Admin: Get quiz confirmation
+router.get('/:quizId/confirmation', authenticateToken, requireTeacher, getQuizConfirmation);
 
-// Get all quizzes with details
+// Teacher & Admin: Update quiz status
+router.patch('/:quizId/status', authenticateToken, requireTeacher, updateQuizStatus);
+
+// Teacher & Admin: Delete draft quiz
+router.delete('/:quizId', authenticateToken, requireTeacher, deleteQuiz);
+
+// Admin only: Get all quizzes
 router.get('/', authenticateToken, requireAdmin, getAllQuizzes);
 
-// Get quiz by id with details
+// Admin only: Get quiz by id
 router.get('/:quizId', authenticateToken, requireAdmin, getQuizById);
 
-// Update quiz by id
+// Admin only: Update quiz by id
 router.put('/:quizId', authenticateToken, requireAdmin, updateQuiz);
 
 module.exports = router;

@@ -111,8 +111,42 @@ const requireOwnershipOrAdmin = async (req, res, next) => {
   }
 };
 
+// Authorization middleware for teacher routes
+const requireTeacher = async (req, res, next) => {
+  if (!req.userId) {
+    return res.status(401).json({
+      error: 'Access denied',
+      message: 'Authentication required'
+    });
+  }
+  try {
+    const user = await User.findByPk(req.userId);
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+        message: 'The authenticated user no longer exists'
+      });
+    }
+    if (user.role !== 'teacher' && user.role !== 'admin') {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'Teacher privileges required'
+      });
+    }
+    req.user = user;
+    next();
+  } catch (error) {
+    console.error('Teacher authorization error:', error);
+    return res.status(500).json({
+      error: 'Authorization failed',
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
   authenticateToken,
   requireAdmin,
-  requireOwnershipOrAdmin
+  requireOwnershipOrAdmin,
+  requireTeacher
 };
